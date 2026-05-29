@@ -68,7 +68,15 @@ export interface Proposal {
   paidAt: string | null;
 }
 
-export interface ProposalDetail extends Proposal {
+export interface ProposalDetail {
+  id: number;
+  status: ProposalStatus;
+  note: string | null;
+  createdAt: string;
+  updatedAt: string;
+  sentAt: string | null;
+  approvedAt: string | null;
+  paidAt: string | null;
   totalCents: number;
   reservation: Reservation;
   member: Member;
@@ -102,6 +110,22 @@ export interface CreateProposalInput {
   reservationId: number;
   note?: string;
   items: CreateProposalItemInput[];
+}
+
+export interface CreateProposalResult {
+  id: number;
+  status: "draft";
+}
+
+export interface UpdateProposalStatusResult {
+  id: number;
+  status: ProposalStatusUpdate;
+}
+
+export interface SendProposalResult {
+  id: number;
+  status: "sent";
+  proposalUrl: string;
 }
 
 export interface ApiSuccess<T> {

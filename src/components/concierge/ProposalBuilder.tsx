@@ -24,6 +24,7 @@ import type {
   CreateProposalItemInput,
   CreateProposalResult,
   ReservationWithMember,
+  SendProposalResult,
 } from "@/lib/types";
 
 type ProposalBuilderProps = {
@@ -34,12 +35,15 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
   const router = useRouter();
   const [draftItems, setDraftItems] = useState<DraftItineraryItem[]>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   const [saveError, setSaveError] = useState<string | undefined>();
   const [savedDraftId, setSavedDraftId] = useState<number | null>(null);
+  const [sentProposalId, setSentProposalId] = useState<number | null>(null);
   const totalCents = sumCents(draftItems);
 
   function addDraftItem(item: CreateProposalItemInput) {
     setSavedDraftId(null);
+    setSentProposalId(null);
     setSaveError(undefined);
     setDraftItems((currentItems) => [
       ...currentItems,
@@ -53,6 +57,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
 
   function removeDraftItem(localId: string) {
     setSavedDraftId(null);
+    setSentProposalId(null);
     setSaveError(undefined);
     setDraftItems((currentItems) =>
       currentItems.filter((item) => item.localId !== localId),
@@ -87,6 +92,42 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
     }
   }
 
+  async function sendDraftProposal() {
+    if (draftItems.length === 0) {
+      setSaveError("Add at least one itinerary item before sending a proposal.");
+      return;
+    }
+
+    setIsSending(true);
+    setSaveError(undefined);
+
+    try {
+      let proposalId = savedDraftId;
+
+      if (!proposalId) {
+        const draftProposal = await createDraftProposal({
+          reservationId: reservation.id,
+          items: draftItems.map(toCreateProposalItem),
+        });
+
+        proposalId = draftProposal.id;
+        setSavedDraftId(draftProposal.id);
+      }
+
+      const sentProposal = await sendProposal(proposalId);
+
+      setSavedDraftId(proposalId);
+      setSentProposalId(sentProposal.id);
+      router.refresh();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error ? error.message : "Proposal could not be sent.",
+      );
+    } finally {
+      setIsSending(false);
+    }
+  }
+
   return (
     <Card as="section" padding="lg">
       <CardHeader>
@@ -111,9 +152,12 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
             reservation={reservation}
             totalCents={totalCents}
             isSaving={isSaving}
+            isSending={isSending}
             savedDraftId={savedDraftId}
+            sentProposalId={sentProposalId}
             error={saveError}
             onSaveDraft={saveDraft}
+            onSendProposal={sendDraftProposal}
           />
         </div>
       </CardContent>
@@ -151,6 +195,26 @@ async function createDraftProposal(
       "error" in body
         ? body.error.message
         : "Draft proposal could not be saved.",
+    );
+  }
+
+  return body.data;
+}
+
+async function sendProposal(proposalId: number): Promise<SendProposalResult> {
+  const response = await fetch(`/api/proposals/${proposalId}/send`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+    },
+  });
+  const body = (await response.json()) as
+    | ApiSuccess<SendProposalResult>
+    | ApiFailure;
+
+  if (!response.ok || "error" in body) {
+    throw new Error(
+      "error" in body ? body.error.message : "Proposal could not be sent.",
     );
   }
 

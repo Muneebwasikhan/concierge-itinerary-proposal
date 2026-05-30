@@ -1,4 +1,5 @@
 import { CheckCircle2, ClipboardList } from "lucide-react";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { DraftItineraryItem } from "@/components/concierge/DraftItemList";
@@ -17,18 +18,24 @@ type ProposalPreviewProps = {
   reservation: ReservationWithMember;
   totalCents: number;
   isSaving: boolean;
+  isSending: boolean;
   savedDraftId: number | null;
+  sentProposalId: number | null;
   error?: string;
   onSaveDraft: () => void;
+  onSendProposal: () => void;
 };
 
 export function ProposalPreview({
   error,
   isSaving,
+  isSending,
   items,
   onSaveDraft,
+  onSendProposal,
   reservation,
   savedDraftId,
+  sentProposalId,
   totalCents,
 }: ProposalPreviewProps) {
   const tripDates = formatReservationDateRange(
@@ -39,7 +46,10 @@ export function ProposalPreview({
     reservation.arrivalDate,
     reservation.departureDate,
   );
-  const isSaveDisabled = items.length === 0 || isSaving || savedDraftId !== null;
+  const isSaveDisabled =
+    items.length === 0 || isSaving || isSending || savedDraftId !== null;
+  const isSendDisabled = isSaving || isSending || sentProposalId !== null;
+  const previewStatus = sentProposalId ? "Sent" : "Draft";
 
   return (
     <aside
@@ -59,7 +69,7 @@ export function ProposalPreview({
           </p>
         </div>
         <p className="rounded-full bg-accent-soft px-2.5 py-1 text-xs font-semibold text-accent">
-          Draft
+          {previewStatus}
         </p>
       </div>
 
@@ -128,9 +138,22 @@ export function ProposalPreview({
         </div>
       </div>
 
-      {savedDraftId ? (
+      {savedDraftId && !sentProposalId ? (
         <StatusMessage tone="success" icon={<CheckCircle2 className="h-4 w-4" />}>
           Draft proposal PR-{savedDraftId.toString().padStart(4, "0")} saved.
+        </StatusMessage>
+      ) : null}
+
+      {sentProposalId ? (
+        <StatusMessage tone="success" icon={<CheckCircle2 className="h-4 w-4" />}>
+          Proposal sent. James can now review{" "}
+          <Link
+            href={`/proposal/${sentProposalId}`}
+            className="underline underline-offset-4"
+          >
+            /proposal/{sentProposalId}
+          </Link>
+          .
         </StatusMessage>
       ) : null}
 
@@ -149,6 +172,17 @@ export function ProposalPreview({
         onClick={onSaveDraft}
       >
         {savedDraftId ? "Draft saved" : "Save Draft"}
+      </Button>
+      <Button
+        type="button"
+        className="mt-3 w-full"
+        variant="secondary"
+        isLoading={isSending}
+        loadingLabel="Sending proposal"
+        disabled={isSendDisabled}
+        onClick={onSendProposal}
+      >
+        {sentProposalId ? "Proposal sent" : "Send Proposal"}
       </Button>
     </aside>
   );

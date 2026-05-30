@@ -18,20 +18,44 @@ type SentProposalsTableProps = {
   proposals: ProposalSummary[];
 };
 
-const statusClasses: Record<ProposalStatus, string> = {
-  draft: "bg-muted text-muted-foreground",
-  sent: "bg-info/15 text-info",
-  approved: "bg-warning/15 text-warning",
-  paid: "bg-success/15 text-success",
+const statusBadgeConfig: Record<
+  ProposalStatus,
+  {
+    className: string;
+    dotClassName: string;
+    label: string;
+  }
+> = {
+  draft: {
+    className: "border-border bg-muted text-muted-foreground",
+    dotClassName: "bg-muted-foreground",
+    label: "Draft",
+  },
+  sent: {
+    className: "border-info/25 bg-info/10 text-info",
+    dotClassName: "bg-info",
+    label: "Sent",
+  },
+  approved: {
+    className: "border-warning/25 bg-warning/10 text-warning",
+    dotClassName: "bg-warning",
+    label: "Approved",
+  },
+  paid: {
+    className: "border-success/25 bg-success/10 text-success",
+    dotClassName: "bg-success",
+    label: "Paid",
+  },
 };
 
 export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
   return (
     <Card as="section" padding="none">
       <CardHeader className="px-5 pt-5">
-        <CardTitle>Sent Proposals</CardTitle>
+        <CardTitle>Proposals</CardTitle>
         <CardDescription>
-          Track proposal status after drafts are saved and sent to James.
+          Track drafts, sent proposals, approvals, and paid itineraries for
+          James.
         </CardDescription>
       </CardHeader>
       <CardContent className="mt-5">
@@ -45,7 +69,7 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-sm">
+            <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="border-y border-border bg-surface-muted text-xs font-medium uppercase text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-5 py-3">
@@ -61,16 +85,16 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                     Status
                   </th>
                   <th scope="col" className="px-5 py-3">
-                    Items
+                    Item count
                   </th>
                   <th scope="col" className="px-5 py-3">
                     Total
                   </th>
                   <th scope="col" className="px-5 py-3">
-                    Created
+                    Created date
                   </th>
                   <th scope="col" className="px-5 py-3">
-                    Sent
+                    Sent date
                   </th>
                   <th scope="col" className="px-5 py-3">
                     Member link
@@ -88,10 +112,10 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                     </td>
                     <td className="px-5 py-4">
                       <p className="font-medium text-foreground">
-                        {proposal.villa}
+                        {proposal.destination}
                       </p>
                       <p className="mt-1 text-muted-foreground">
-                        {proposal.destination}
+                        {proposal.villa}
                       </p>
                     </td>
                     <td className="px-5 py-4">
@@ -135,14 +159,21 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
 }
 
 function StatusBadge({ status }: { status: ProposalStatus }) {
+  const config = statusBadgeConfig[status];
+
   return (
     <span
+      aria-label={`Proposal status: ${config.label}`}
       className={cn(
-        "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold uppercase",
-        statusClasses[status],
+        "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold",
+        config.className,
       )}
     >
-      {status}
+      <span
+        aria-hidden="true"
+        className={cn("h-1.5 w-1.5 rounded-full", config.dotClassName)}
+      />
+      {config.label}
     </span>
   );
 }

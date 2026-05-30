@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import {
+  DraftItemList,
+  type DraftItineraryItem,
+} from "@/components/concierge/DraftItemList";
 import { ItineraryItemForm } from "@/components/concierge/ItineraryItemForm";
 import {
   Card,
@@ -10,13 +14,28 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import { sumCents } from "@/lib/money";
 import type { CreateProposalItemInput } from "@/lib/types";
 
 export function ProposalBuilder() {
-  const [draftItems, setDraftItems] = useState<CreateProposalItemInput[]>([]);
+  const [draftItems, setDraftItems] = useState<DraftItineraryItem[]>([]);
+  const totalCents = sumCents(draftItems);
 
   function addDraftItem(item: CreateProposalItemInput) {
-    setDraftItems((currentItems) => [...currentItems, item]);
+    setDraftItems((currentItems) => [
+      ...currentItems,
+      {
+        ...item,
+        // Local-only key until ER-015 persists draft items to SQLite.
+        localId: crypto.randomUUID(),
+      },
+    ]);
+  }
+
+  function removeDraftItem(localId: string) {
+    setDraftItems((currentItems) =>
+      currentItems.filter((item) => item.localId !== localId),
+    );
   }
 
   return (
@@ -27,20 +46,14 @@ export function ProposalBuilder() {
           Add line items locally before saving or sending a proposal.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
         {/* This client island owns temporary draft state until the save flow is added. */}
         <ItineraryItemForm onAddItem={addDraftItem} />
-        <div
-          role="status"
-          aria-live="polite"
-          className="mt-5 rounded-lg border border-border bg-surface-muted px-4 py-3 text-sm text-muted-foreground"
-        >
-          <span className="font-medium text-foreground">
-            {draftItems.length}
-          </span>{" "}
-          {draftItems.length === 1 ? "item" : "items"} staged locally. The
-          draft list and live total are added in the next step.
-        </div>
+        <DraftItemList
+          items={draftItems}
+          totalCents={totalCents}
+          onRemoveItem={removeDraftItem}
+        />
       </CardContent>
     </Card>
   );

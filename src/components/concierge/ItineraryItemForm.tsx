@@ -8,6 +8,7 @@ import { CategoryPicker } from "@/components/concierge/CategoryPicker";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
+import { parseIsoDate } from "@/lib/dates";
 import { dollarsToCents } from "@/lib/money";
 import {
   ITINERARY_CATEGORIES,
@@ -109,7 +110,11 @@ export function ItineraryItemForm({ onAddItem }: ItineraryItemFormProps) {
           id="item-date"
           name="date"
           label="Date"
-          type="date"
+          type="text"
+          inputMode="numeric"
+          pattern="\\d{4}-\\d{2}-\\d{2}"
+          placeholder="2027-03-15"
+          hint="Use YYYY-MM-DD."
           onInput={() => clearError("date")}
           error={errors.date}
           required
@@ -118,7 +123,11 @@ export function ItineraryItemForm({ onAddItem }: ItineraryItemFormProps) {
           id="item-time"
           name="time"
           label="Time"
-          type="time"
+          type="text"
+          inputMode="numeric"
+          pattern="\\d{2}:\\d{2}"
+          placeholder="19:30"
+          hint="Use 24-hour HH:MM."
           onInput={() => clearError("time")}
           error={errors.time}
           required
@@ -199,6 +208,13 @@ function validateFormValues(values: FormValues):
     errors.time = "Time is required.";
   }
 
+  const scheduledAt = `${values.date}T${values.time}:00`;
+
+  if (values.date && values.time && !parseIsoDate(scheduledAt)) {
+    errors.date = "Enter a valid date.";
+    errors.time = "Enter a valid time.";
+  }
+
   const priceCents = dollarsToCents(values.price);
 
   if (values.price.trim().length === 0) {
@@ -217,7 +233,7 @@ function validateFormValues(values: FormValues):
       category: values.category,
       title,
       description,
-      scheduledAt: `${values.date}T${values.time}:00`,
+      scheduledAt,
       priceCents,
     },
   };

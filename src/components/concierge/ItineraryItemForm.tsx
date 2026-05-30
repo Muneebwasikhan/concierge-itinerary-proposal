@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus, RotateCcw } from "lucide-react";
-import type { FormEvent } from "react";
+import type { FormEvent, MouseEvent } from "react";
 import { useState } from "react";
 
 import { CategoryPicker } from "@/components/concierge/CategoryPicker";
@@ -110,11 +110,9 @@ export function ItineraryItemForm({ onAddItem }: ItineraryItemFormProps) {
           id="item-date"
           name="date"
           label="Date"
-          type="text"
-          inputMode="numeric"
-          pattern="\\d{4}-\\d{2}-\\d{2}"
-          placeholder="2027-03-15"
-          hint="Use YYYY-MM-DD."
+          type="date"
+          className="native-picker-input cursor-pointer"
+          onClick={openNativePicker}
           onInput={() => clearError("date")}
           error={errors.date}
           required
@@ -123,11 +121,9 @@ export function ItineraryItemForm({ onAddItem }: ItineraryItemFormProps) {
           id="item-time"
           name="time"
           label="Time"
-          type="text"
-          inputMode="numeric"
-          pattern="\\d{2}:\\d{2}"
-          placeholder="19:30"
-          hint="Use 24-hour HH:MM."
+          type="time"
+          className="native-picker-input cursor-pointer"
+          onClick={openNativePicker}
           onInput={() => clearError("time")}
           error={errors.time}
           required
@@ -162,6 +158,14 @@ export function ItineraryItemForm({ onAddItem }: ItineraryItemFormProps) {
       </div>
     </form>
   );
+}
+
+function openNativePicker(event: MouseEvent<HTMLInputElement>) {
+  try {
+    event.currentTarget.showPicker();
+  } catch {
+    // Some browsers only expose the native picker through their built-in icon.
+  }
 }
 
 function readFormValues(form: HTMLFormElement): Omit<FormValues, "category"> {

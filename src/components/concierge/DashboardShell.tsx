@@ -18,7 +18,7 @@ export function DashboardShell({ proposals, reservation }: DashboardShellProps) 
   return (
     <DashboardFrame proposalCount={proposals.length}>
       <ReservationSummary reservation={reservation} />
-      <ProposalBuilder />
+      <ProposalBuilder reservation={reservation} />
       <SentProposalsTable proposals={proposals} />
     </DashboardFrame>
   );

@@ -63,6 +63,20 @@ textarea {
   font: inherit;
 }
 
+.native-picker-input {
+  position: relative;
+}
+
+.native-picker-input::-webkit-calendar-picker-indicator {
+  /* Expand the native picker trigger so the full date/time field opens it. */
+  cursor: pointer;
+  height: auto;
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  width: auto;
+}
+
 ::selection {
   background: var(--accent-soft);
   color: var(--foreground);

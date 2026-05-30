@@ -27,38 +27,92 @@ export function ProposalMemberActions({
   const [error, setError] = useState<string | undefined>();
 
   async function approveProposal() {
+    const originalProposal = proposal;
     setIsApproving(true);
+
+    setProposal((prev) => ({
+      ...prev,
+      status: "approved" as const,
+      approvedAt: new Date().toISOString(),
+    }));
     setError(undefined);
+
+    // Save optimistic override to localStorage
+    try {
+      const overrides = JSON.parse(localStorage.getItem("proposal_overrides") || "{}");
+      overrides[proposal.id.toString()] = {
+        status: "approved",
+        approvedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+    } catch (e) {
+      console.error("Failed to write optimistic approval override", e);
+    }
 
     try {
       await updateProposalStatus(proposal.id, "approved");
       const refreshedProposal = await fetchProposalDetail(proposal.id);
-
       setProposal(refreshedProposal);
     } catch (approvalError) {
       console.error("Proposal approval failed.", approvalError);
+      setProposal(originalProposal);
       setError(
-        "We couldn't approve this proposal. Refresh and try again.",
+        "We couldn't approve this proposal. Please check your connection and try again.",
       );
+
+      // Revert localStorage override on failure
+      try {
+        const overrides = JSON.parse(localStorage.getItem("proposal_overrides") || "{}");
+        delete overrides[proposal.id.toString()];
+        localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+      } catch {}
     } finally {
       setIsApproving(false);
     }
   }
 
   async function payProposal() {
+    const originalProposal = proposal;
     setIsPaying(true);
+
+    setProposal((prev) => ({
+      ...prev,
+      status: "paid" as const,
+      paidAt: new Date().toISOString(),
+    }));
     setError(undefined);
+
+    // Save optimistic override to localStorage
+    try {
+      const overrides = JSON.parse(localStorage.getItem("proposal_overrides") || "{}");
+      overrides[proposal.id.toString()] = {
+        status: "paid",
+        paidAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+    } catch (e) {
+      console.error("Failed to write optimistic payment override", e);
+    }
 
     try {
       await updateProposalStatus(proposal.id, "paid");
       const refreshedProposal = await fetchProposalDetail(proposal.id);
-
       setProposal(refreshedProposal);
     } catch (paymentError) {
       console.error("Proposal payment failed.", paymentError);
+      setProposal(originalProposal);
       setError(
-        "We couldn't lock in this itinerary. Refresh and try again.",
+        "We couldn't lock in this itinerary. Please check your connection and try again.",
       );
+
+      // Revert localStorage override on failure
+      try {
+        const overrides = JSON.parse(localStorage.getItem("proposal_overrides") || "{}");
+        delete overrides[proposal.id.toString()];
+        localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+      } catch {}
     } finally {
       setIsPaying(false);
     }
@@ -167,7 +221,7 @@ function ProposalConfirmation({ proposal }: { proposal: ProposalDetail }) {
   return (
     <section
       aria-labelledby="proposal-confirmation-heading"
-      className="rounded-lg border border-success/25 bg-success/10 p-5 shadow-[0_18px_44px_rgba(37,32,24,0.07)] sm:p-6"
+      className="rounded-lg border border-success/25 bg-success/10 p-5 shadow-[0_18px_44px_rgba(37,32,24,0.07)] sm:p-6 animate-fade-in-up"
     >
       <div
         aria-hidden="true"

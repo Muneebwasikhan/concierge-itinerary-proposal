@@ -2,14 +2,14 @@
 
 import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 import { ProposalBuilder } from "@/components/concierge/ProposalBuilder";
 import { ReservationSummary } from "@/components/concierge/ReservationSummary";
 import { SentProposalsTable } from "@/components/concierge/SentProposalsTable";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
-import type { ProposalSummary, ReservationWithMember } from "@/lib/types";
+import type { ProposalSummary, ReservationWithMember, ProposalStatus } from "@/lib/types";
 
 type DashboardShellProps = {
   reservation: ReservationWithMember;
@@ -18,17 +18,119 @@ type DashboardShellProps = {
 
 export function DashboardShell({ proposals, reservation }: DashboardShellProps) {
   const [editingDraftId, setEditingDraftId] = useState<number | null>(null);
+  const [localProposals, setLocalProposals] = useState<ProposalSummary[]>(proposals);
+
+  useEffect(() => {
+    try {
+      const overridesStr = localStorage.getItem("proposal_overrides");
+      if (overridesStr) {
+        const overrides = JSON.parse(overridesStr) as Record<
+          string,
+          { status: ProposalStatus; approvedAt?: string | null; paidAt?: string | null; updatedAt?: string }
+        >;
+
+        setTimeout(() => {
+          setLocalProposals((current) =>
+            current.map((p) => {
+              const override = overrides[p.id.toString()];
+              if (override) {
+                return {
+                  ...p,
+                  status: override.status,
+                  approvedAt: override.approvedAt !== undefined ? override.approvedAt : p.approvedAt,
+                  paidAt: override.paidAt !== undefined ? override.paidAt : p.paidAt,
+                  updatedAt: override.updatedAt !== undefined ? override.updatedAt : p.updatedAt,
+                };
+              }
+              return p;
+            })
+          );
+        }, 0);
+      }
+    } catch (err) {
+      console.error("Failed to load proposal overrides from localStorage", err);
+    }
+  }, []);
+
+  const handleProposalSaved = (proposalId: number, itemCount: number, totalCents: number) => {
+    try {
+      const overridesStr = localStorage.getItem("proposal_overrides");
+      if (overridesStr) {
+        const overrides = JSON.parse(overridesStr);
+        delete overrides[proposalId.toString()];
+        localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+      }
+    } catch {}
+
+    setLocalProposals((current) => {
+      const exists = current.some((p) => p.id === proposalId);
+      if (exists) {
+        return current.map((p) =>
+          p.id === proposalId
+            ? {
+                ...p,
+                itemCount,
+                totalCents,
+                updatedAt: new Date().toISOString(),
+              }
+            : p
+        );
+      } else {
+        const newProposal: ProposalSummary = {
+          id: proposalId,
+          status: "draft",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          sentAt: null,
+          approvedAt: null,
+          paidAt: null,
+          itemCount,
+          totalCents,
+          memberName: reservation.member.name,
+          destination: reservation.destination,
+          villa: reservation.villa,
+        };
+        return [newProposal, ...current];
+      }
+    });
+  };
+
+  const handleProposalSent = (proposalId: number) => {
+    try {
+      const overridesStr = localStorage.getItem("proposal_overrides");
+      if (overridesStr) {
+        const overrides = JSON.parse(overridesStr);
+        delete overrides[proposalId.toString()];
+        localStorage.setItem("proposal_overrides", JSON.stringify(overrides));
+      }
+    } catch {}
+
+    setLocalProposals((current) =>
+      current.map((p) =>
+        p.id === proposalId
+          ? {
+              ...p,
+              status: "sent",
+              sentAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            }
+          : p
+      )
+    );
+  };
 
   return (
-    <DashboardFrame proposalCount={proposals.length}>
+    <DashboardFrame proposalCount={localProposals.length}>
       <ReservationSummary reservation={reservation} />
       <ProposalBuilder
         reservation={reservation}
         editingDraftId={editingDraftId}
         onCancelEdit={() => setEditingDraftId(null)}
+        onProposalSaved={handleProposalSaved}
+        onProposalSent={handleProposalSent}
       />
       <SentProposalsTable
-        proposals={proposals}
+        proposals={localProposals}
         onEditDraft={(id) => setEditingDraftId(id)}
       />
     </DashboardFrame>

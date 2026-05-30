@@ -31,12 +31,16 @@ type ProposalBuilderProps = {
   reservation: ReservationWithMember;
   editingDraftId?: number | null;
   onCancelEdit?: () => void;
+  onProposalSaved?: (proposalId: number, itemCount: number, totalCents: number) => void;
+  onProposalSent?: (proposalId: number) => void;
 };
 
 export function ProposalBuilder({
   reservation,
   editingDraftId,
   onCancelEdit,
+  onProposalSaved,
+  onProposalSent,
 }: ProposalBuilderProps) {
   const router = useRouter();
   const [draftItems, setDraftItems] = useState<DraftItineraryItem[]>([]);
@@ -163,6 +167,7 @@ export function ProposalBuilder({
           note: note.trim() || undefined,
           items: draftItems.map(toCreateProposalItem),
         });
+        onProposalSaved?.(savedDraftId, draftItems.length, totalCents);
       } else {
         const proposal = await createDraftProposal({
           reservationId: reservation.id,
@@ -170,6 +175,7 @@ export function ProposalBuilder({
           items: draftItems.map(toCreateProposalItem),
         });
         setSavedDraftId(proposal.id);
+        onProposalSaved?.(proposal.id, draftItems.length, totalCents);
       }
 
       router.refresh();
@@ -205,12 +211,14 @@ export function ProposalBuilder({
 
         proposalId = draftProposal.id;
         setSavedDraftId(draftProposal.id);
+        onProposalSaved?.(draftProposal.id, draftItems.length, totalCents);
       }
 
       const sentProposal = await sendProposal(proposalId);
 
       setSavedDraftId(proposalId);
       setSentProposalId(sentProposal.id);
+      onProposalSent?.(proposalId);
       router.refresh();
     } catch (error) {
       setSaveError(

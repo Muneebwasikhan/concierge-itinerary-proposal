@@ -33,10 +33,7 @@ export async function getProposalDetailPageData(
     return {
       ok: false,
       reason: "failed",
-      message:
-        error instanceof Error
-          ? error.message
-          : "This itinerary could not be loaded right now.",
+      message: "We couldn't load this itinerary. Refresh and try again.",
     };
   }
 }

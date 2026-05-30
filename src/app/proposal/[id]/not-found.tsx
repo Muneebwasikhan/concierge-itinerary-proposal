@@ -9,8 +9,8 @@ export default function ProposalNotFound() {
       <div className="mx-auto w-full max-w-3xl">
         <EmptyState
           icon={<FileQuestion className="h-5 w-5" />}
-          title="Itinerary not found"
-          description="This proposal may have been removed or the link may be incorrect."
+          title="Proposal not found"
+          description="This link does not match an active proposal."
           action={
             <Link
               href="/"

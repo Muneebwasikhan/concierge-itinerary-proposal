@@ -66,7 +66,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
 
   async function saveDraft() {
     if (draftItems.length === 0) {
-      setSaveError("Add at least one itinerary item before saving a draft.");
+      setSaveError("Add an itinerary item before saving.");
       return;
     }
 
@@ -94,7 +94,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
 
   async function sendDraftProposal() {
     if (draftItems.length === 0) {
-      setSaveError("Add at least one itinerary item before sending a proposal.");
+      setSaveError("Add an itinerary item before sending.");
       return;
     }
 

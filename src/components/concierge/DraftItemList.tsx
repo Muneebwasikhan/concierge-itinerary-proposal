@@ -50,7 +50,7 @@ export function DraftItemList({
           className="mt-4 min-h-44"
           icon={<CalendarClock className="h-5 w-5" />}
           title="No draft items yet"
-          description="Added itinerary items will appear here before they are saved."
+          description="Add an itinerary item to start building this proposal."
         />
       ) : (
         <ul className="mt-4 divide-y divide-border rounded-lg border border-border bg-surface">

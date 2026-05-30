@@ -100,8 +100,8 @@ export function ProposalPreview({
           <EmptyState
             className="mt-3 min-h-40 bg-surface"
             icon={<ClipboardList className="h-5 w-5" />}
-            title="Nothing to preview yet"
-            description="Add itinerary items to see them here."
+            title="No items to preview"
+            description="Add an itinerary item to see the member preview."
           />
         ) : (
           <ul className="mt-3 divide-y divide-border rounded-lg border border-border bg-surface">

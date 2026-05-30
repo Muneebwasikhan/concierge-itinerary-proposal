@@ -14,12 +14,12 @@ async function loadDashboardPage(): Promise<DashboardPageState> {
   try {
     return { ok: true, data: await getDashboardData() };
   } catch (error) {
+    console.error("Failed to load dashboard.", error);
+
     return {
       ok: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "The dashboard could not load right now.",
+        "We couldn't load the Villa Punta Mita reservation. Check the seed data and reload.",
     };
   }
 }

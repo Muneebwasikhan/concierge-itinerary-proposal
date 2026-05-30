@@ -1,4 +1,4 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Clock3 } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -41,6 +41,10 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
     return <ProposalLoadFailedState message={state.message} />;
   }
 
+  if (state.proposal.status === "draft") {
+    return <ProposalDraftUnavailableState />;
+  }
+
   return (
     <main id="main-content" className="min-h-screen px-5 py-8 sm:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
@@ -52,6 +56,28 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
             <ProposalMemberActions proposal={state.proposal} />
           </div>
         </div>
+      </div>
+    </main>
+  );
+}
+
+function ProposalDraftUnavailableState() {
+  return (
+    <main id="main-content" className="min-h-screen px-5 py-8 sm:px-8">
+      <div className="mx-auto w-full max-w-3xl">
+        <EmptyState
+          icon={<Clock3 className="h-5 w-5" />}
+          title="Proposal not ready yet"
+          description="This itinerary is still being prepared. Please check back after it is sent."
+          action={
+            <Link
+              href="/"
+              className="inline-flex h-10 items-center justify-center rounded-lg border border-border bg-surface px-4 text-sm font-medium leading-none text-foreground shadow-[0_8px_18px_rgba(37,32,24,0.06)] transition hover:border-muted-foreground/45 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              Return to dashboard
+            </Link>
+          }
+        />
       </div>
     </main>
   );

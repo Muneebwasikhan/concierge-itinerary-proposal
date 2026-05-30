@@ -64,7 +64,7 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
             <EmptyState
               icon={<ClipboardList className="h-5 w-5" />}
               title="No proposals yet"
-              description="Saved and sent proposals will appear here."
+              description="Saved drafts and sent proposals will appear here."
             />
           </div>
         ) : (

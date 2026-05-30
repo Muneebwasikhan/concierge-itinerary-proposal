@@ -36,10 +36,9 @@ export function ProposalMemberActions({
 
       setProposal(refreshedProposal);
     } catch (approvalError) {
+      console.error("Proposal approval failed.", approvalError);
       setError(
-        approvalError instanceof Error
-          ? approvalError.message
-          : "Proposal could not be approved.",
+        "We couldn't approve this proposal. Refresh and try again.",
       );
     } finally {
       setIsApproving(false);
@@ -56,10 +55,9 @@ export function ProposalMemberActions({
 
       setProposal(refreshedProposal);
     } catch (paymentError) {
+      console.error("Proposal payment failed.", paymentError);
       setError(
-        paymentError instanceof Error
-          ? paymentError.message
-          : "Proposal could not be paid.",
+        "We couldn't lock in this itinerary. Refresh and try again.",
       );
     } finally {
       setIsPaying(false);
@@ -118,8 +116,8 @@ export function ProposalMemberActions({
       {proposal.status === "draft" ? (
         <StatusCallout
           icon={<Clock3 className="h-4 w-4" />}
-          title="Waiting to be sent"
-          description="This proposal is still a draft and cannot be approved yet."
+          title="Proposal not ready"
+          description="This draft needs to be sent before member actions are available."
         />
       ) : null}
 

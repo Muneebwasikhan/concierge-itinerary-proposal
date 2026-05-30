@@ -34,7 +34,7 @@ export function DashboardLoadingState() {
               aria-hidden="true"
               className="h-4 w-4 motion-safe:animate-spin"
             />
-            Loading reservation and proposals
+            Loading reservation details
           </div>
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {[0, 1, 2, 3].map((item) => (
@@ -59,7 +59,7 @@ export function DashboardErrorState({ message }: { message: string }) {
       <EmptyState
         role="alert"
         icon={<AlertTriangle className="h-5 w-5" />}
-        title="Dashboard could not load"
+        title="Reservation could not load"
         description={message}
         action={
           <Link

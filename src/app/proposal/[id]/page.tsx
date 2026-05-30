@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getProposalDetailPageData } from "@/actions/proposal-detail";
+import { ConciergeNote } from "@/components/member/ConciergeNote";
 import { ProposalHero } from "@/components/proposal/ProposalHero";
 import { ProposalMemberActions } from "@/components/proposal/ProposalMemberActions";
 import { ProposalPriceSummary } from "@/components/proposal/ProposalPriceSummary";
@@ -49,6 +50,11 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
     <main id="main-content" className="min-h-screen px-5 py-8 sm:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <ProposalHero proposal={state.proposal} />
+        
+        {state.proposal.note ? (
+          <ConciergeNote note={state.proposal.note} />
+        ) : null}
+
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <ProposalTimeline items={state.proposal.items} />
           <div className="space-y-6 lg:sticky lg:top-6">

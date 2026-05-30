@@ -16,6 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/Card";
+import { Textarea } from "@/components/ui/Textarea";
 import { sumCents } from "@/lib/money";
 import type {
   ApiFailure,
@@ -34,6 +35,7 @@ type ProposalBuilderProps = {
 export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
   const router = useRouter();
   const [draftItems, setDraftItems] = useState<DraftItineraryItem[]>([]);
+  const [note, setNote] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [saveError, setSaveError] = useState<string | undefined>();
@@ -76,6 +78,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
     try {
       const proposal = await createDraftProposal({
         reservationId: reservation.id,
+        note: note.trim() || undefined,
         items: draftItems.map(toCreateProposalItem),
       });
 
@@ -107,6 +110,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
       if (!proposalId) {
         const draftProposal = await createDraftProposal({
           reservationId: reservation.id,
+          note: note.trim() || undefined,
           items: draftItems.map(toCreateProposalItem),
         });
 
@@ -146,6 +150,19 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
               totalCents={totalCents}
               onRemoveItem={removeDraftItem}
             />
+            <div className="mt-6">
+              <Textarea
+                id="proposal-note"
+                label="Concierge Message (Optional)"
+                placeholder="Add a warm personal greeting, trip details, or preparation notes for the member..."
+                value={note}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  setSaveError(undefined);
+                }}
+                disabled={savedDraftId !== null || sentProposalId !== null}
+              />
+            </div>
           </div>
           <ProposalPreview
             items={draftItems}
@@ -156,6 +173,7 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
             savedDraftId={savedDraftId}
             sentProposalId={sentProposalId}
             error={saveError}
+            note={note}
             onSaveDraft={saveDraft}
             onSendProposal={sendDraftProposal}
           />

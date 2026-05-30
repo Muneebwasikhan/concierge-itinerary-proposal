@@ -22,6 +22,7 @@ type ProposalPreviewProps = {
   savedDraftId: number | null;
   sentProposalId: number | null;
   error?: string;
+  note?: string;
   onSaveDraft: () => void;
   onSendProposal: () => void;
 };
@@ -37,6 +38,7 @@ export function ProposalPreview({
   savedDraftId,
   sentProposalId,
   totalCents,
+  note,
 }: ProposalPreviewProps) {
   const tripDates = formatReservationDateRange(
     reservation.arrivalDate,
@@ -87,6 +89,17 @@ export function ProposalPreview({
           }
         />
       </div>
+
+      {note && note.trim().length > 0 ? (
+        <div className="mt-5 rounded-lg border border-border bg-surface px-4 py-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+            Concierge Message
+          </p>
+          <p className="mt-2 text-sm italic leading-relaxed text-foreground/90">
+            &ldquo;{note.trim()}&rdquo;
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-5">
         <div className="flex items-center justify-between gap-4">

@@ -28,7 +28,7 @@ export function ProposalTimeline({ items }: ProposalTimelineProps) {
           </p>
           <h2
             id="proposal-timeline-heading"
-            className="mt-1 text-2xl font-semibold leading-8 text-foreground"
+            className="mt-1 break-words text-2xl font-semibold leading-8 text-foreground"
           >
             Daily timeline
           </h2>
@@ -65,7 +65,7 @@ export function ProposalTimeline({ items }: ProposalTimelineProps) {
                 {group.label}
               </h3>
 
-              <ol className="mt-4 space-y-4 border-l border-border pl-5">
+              <ol className="mt-4 space-y-4 border-l border-border pl-4 sm:pl-5">
                 {group.items.map((item) => (
                   <TimelineItem key={item.id} item={item} />
                 ))}
@@ -83,30 +83,30 @@ function TimelineItem({ item }: { item: ProposalDetailItem }) {
     <li className="relative rounded-lg border border-border bg-surface-muted p-4">
       <span
         aria-hidden="true"
-        className="absolute -left-[1.72rem] top-5 h-3 w-3 rounded-full border-2 border-surface bg-accent"
+        className="absolute -left-[1.48rem] top-5 h-3 w-3 rounded-full border-2 border-surface bg-accent sm:-left-[1.72rem]"
       />
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="text-xs font-semibold uppercase text-accent">
             {item.category}
           </p>
-          <h4 className="mt-1 text-lg font-semibold leading-7 text-foreground">
+          <h4 className="mt-1 break-words text-lg font-semibold leading-7 text-foreground">
             {item.title}
           </h4>
         </div>
-        <p className="text-base font-semibold leading-7 text-foreground">
+        <p className="shrink-0 text-base font-semibold leading-7 text-foreground">
           {formatCents(item.priceCents)}
         </p>
       </div>
 
-      <p className="mt-3 flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <Clock3 aria-hidden="true" className="h-4 w-4 text-accent" />
-        <time dateTime={item.scheduledAt}>
+      <p className="mt-3 flex items-start gap-2 text-sm font-medium text-muted-foreground">
+        <Clock3 aria-hidden="true" className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+        <time className="min-w-0 break-words" dateTime={item.scheduledAt}>
           {formatScheduledDateTime(item.scheduledAt)}
         </time>
       </p>
 
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+      <p className="mt-3 break-words text-sm leading-6 text-muted-foreground">
         {item.description}
       </p>
     </li>

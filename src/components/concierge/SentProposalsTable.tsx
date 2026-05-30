@@ -68,8 +68,72 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
             />
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
+          <>
+            <div className="grid gap-3 px-5 pb-5 md:hidden">
+              {proposals.map((proposal) => (
+                <article
+                  key={proposal.id}
+                  className="rounded-lg border border-border bg-surface p-4"
+                  aria-labelledby={`proposal-${proposal.id}-mobile-title`}
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <h3
+                        id={`proposal-${proposal.id}-mobile-title`}
+                        className="break-words text-sm font-semibold text-foreground"
+                      >
+                        PR-{proposal.id.toString().padStart(4, "0")}
+                      </h3>
+                      <p className="mt-1 break-words text-sm text-muted-foreground">
+                        {proposal.memberName}
+                      </p>
+                    </div>
+                    <StatusBadge status={proposal.status} />
+                  </div>
+
+                  <dl className="mt-4 grid gap-3 text-sm">
+                    <MobileProposalFact
+                      label="Destination"
+                      value={`${proposal.destination} · ${proposal.villa}`}
+                    />
+                    <MobileProposalFact
+                      label="Items"
+                      value={proposal.itemCount.toString()}
+                    />
+                    <MobileProposalFact
+                      label="Total"
+                      value={formatCents(proposal.totalCents)}
+                    />
+                    <MobileProposalFact
+                      label="Created"
+                      value={formatDate(proposal.createdAt)}
+                    />
+                    <MobileProposalFact
+                      label="Sent"
+                      value={proposal.sentAt ? formatDate(proposal.sentAt) : "-"}
+                    />
+                  </dl>
+
+                  <div className="mt-4 border-t border-border pt-4">
+                    {proposal.status === "draft" ? (
+                      <span className="text-sm text-muted-foreground">
+                        Available after send
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/proposal/${proposal.id}`}
+                        className="inline-flex rounded-md text-sm font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                      >
+                        Open member link
+                      </Link>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[980px] text-left text-sm">
               <thead className="border-y border-border bg-surface-muted text-xs font-medium uppercase text-muted-foreground">
                 <tr>
                   <th scope="col" className="px-5 py-3">
@@ -141,7 +205,7 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                       ) : (
                         <Link
                           href={`/proposal/${proposal.id}`}
-                          className="font-medium text-accent underline-offset-4 hover:underline focus:outline-none focus:ring-2 focus:ring-accent/30"
+                          className="rounded-md font-medium text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                         >
                           Open
                         </Link>
@@ -150,11 +214,21 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+              </table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function MobileProposalFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-3">
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 break-words font-medium text-foreground">{value}</dd>
+    </div>
   );
 }
 

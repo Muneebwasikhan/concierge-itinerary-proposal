@@ -9,15 +9,15 @@
   --border: #d8d0c2;
   --muted: #eee9df;
   --muted-foreground: #68736f;
-  --accent: #9a7a36;
-  --accent-strong: #84652b;
+  --accent: #72531f;
+  --accent-strong: #5f4416;
   --accent-soft: #f0e4c8;
   --accent-foreground: #fffdf8;
   --info: #315f81;
-  --success: #4d7b63;
-  --warning: #b3892f;
-  --danger: #b85b45;
-  --danger-strong: #9c4937;
+  --success: #3f694f;
+  --warning: #8b651b;
+  --danger: #9c4937;
+  --danger-strong: #88402f;
 }
 
 @theme inline {

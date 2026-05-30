@@ -28,7 +28,7 @@ export function ProposalHero({ proposal }: ProposalHeroProps) {
           <p className="text-sm font-medium text-muted-foreground">
             Exclusive Resorts itinerary proposal
           </p>
-          <p className="rounded-full border border-accent/25 bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
+          <p className="break-words rounded-full border border-accent/25 bg-accent-soft px-3 py-1 text-xs font-semibold text-accent">
             PR-{proposal.id.toString().padStart(4, "0")}
           </p>
         </div>
@@ -41,11 +41,11 @@ export function ProposalHero({ proposal }: ProposalHeroProps) {
           </p>
           <h1
             id="proposal-hero-heading"
-            className="mt-3 max-w-3xl text-4xl font-semibold leading-tight text-foreground sm:text-5xl"
+            className="mt-3 max-w-3xl break-words text-4xl font-semibold leading-tight text-foreground sm:text-5xl"
           >
             {pageTitle}
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground">
+          <p className="mt-4 max-w-2xl break-words text-base leading-7 text-muted-foreground">
             A curated itinerary prepared for {proposal.member.name} at{" "}
             {proposal.reservation.villa}.
           </p>
@@ -101,7 +101,7 @@ function HeroFact({
         <dt className="text-xs font-medium uppercase text-muted-foreground">
           {label}
         </dt>
-        <dd className="mt-1 text-sm font-semibold leading-6 text-foreground">
+        <dd className="mt-1 break-words text-sm font-semibold leading-6 text-foreground">
           {value}
         </dd>
       </div>

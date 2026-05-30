@@ -55,13 +55,13 @@ function SummaryRow({
   value: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-4">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
       <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
       <dd
         className={
           emphasis
-            ? "text-2xl font-semibold leading-8 text-foreground"
-            : "text-sm font-semibold text-foreground"
+            ? "break-words text-right text-2xl font-semibold leading-8 text-foreground"
+            : "break-words text-right text-sm font-semibold text-foreground"
         }
       >
         {value}

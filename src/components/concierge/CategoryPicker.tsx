@@ -17,7 +17,7 @@ export function CategoryPicker({ error, onChange, value }: CategoryPickerProps) 
   return (
     <fieldset aria-describedby={errorId} aria-invalid={Boolean(error)}>
       <legend className="text-sm font-medium text-foreground">
-        Category <span className="text-danger">*</span>
+        Category <span aria-hidden="true" className="text-danger">*</span>
       </legend>
       <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
         {ITINERARY_CATEGORIES.map((category) => {

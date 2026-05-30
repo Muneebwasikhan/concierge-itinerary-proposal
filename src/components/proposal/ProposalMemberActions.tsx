@@ -78,11 +78,11 @@ export function ProposalMemberActions({
       </p>
       <h2
         id="member-actions-heading"
-        className="mt-1 text-xl font-semibold leading-8 text-foreground"
+        className="mt-1 break-words text-xl font-semibold leading-8 text-foreground"
       >
         {getActionTitle(proposal)}
       </h2>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+      <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
         {getActionDescription(proposal)}
       </p>
 
@@ -180,11 +180,11 @@ function ProposalConfirmation({ proposal }: { proposal: ProposalDetail }) {
       </p>
       <h2
         id="proposal-confirmation-heading"
-        className="mt-1 text-2xl font-semibold leading-8 text-foreground"
+        className="mt-1 break-words text-2xl font-semibold leading-8 text-foreground"
       >
         Itinerary locked in
       </h2>
-      <p className="mt-3 text-sm leading-6 text-muted-foreground">
+      <p className="mt-3 break-words text-sm leading-6 text-muted-foreground">
         Your Punta Mita itinerary has been confirmed for{" "}
         {proposal.member.name}. The concierge team can now prepare the final
         arrangements.
@@ -207,9 +207,11 @@ function ProposalConfirmation({ proposal }: { proposal: ProposalDetail }) {
 
 function ConfirmationRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-4 py-3">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3">
       <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-semibold text-foreground">{value}</dd>
+      <dd className="break-words text-right text-sm font-semibold text-foreground">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -234,7 +236,7 @@ function StatusCallout({
         </span>
         {title}
       </div>
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+      <p className="mt-2 break-words text-sm leading-6 text-muted-foreground">
         {description}
       </p>
     </div>

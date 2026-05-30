@@ -11,7 +11,7 @@ export function ProposalPriceSummary({ proposal }: ProposalPriceSummaryProps) {
   return (
     <aside
       aria-labelledby="price-summary-heading"
-      className="rounded-lg border border-border bg-surface p-5 shadow-[0_18px_44px_rgba(37,32,24,0.07)] sm:p-6 lg:sticky lg:top-6"
+      className="rounded-lg border border-border bg-surface p-5 shadow-[0_18px_44px_rgba(37,32,24,0.07)] sm:p-6"
     >
       <div
         aria-hidden="true"

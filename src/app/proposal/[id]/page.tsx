@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { getProposalDetailPageData } from "@/actions/proposal-detail";
 import { ProposalHero } from "@/components/proposal/ProposalHero";
+import { ProposalMemberActions } from "@/components/proposal/ProposalMemberActions";
 import { ProposalPriceSummary } from "@/components/proposal/ProposalPriceSummary";
 import { ProposalTimeline } from "@/components/proposal/ProposalTimeline";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -46,7 +47,10 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
         <ProposalHero proposal={state.proposal} />
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
           <ProposalTimeline items={state.proposal.items} />
-          <ProposalPriceSummary proposal={state.proposal} />
+          <div className="space-y-6 lg:sticky lg:top-6">
+            <ProposalPriceSummary proposal={state.proposal} />
+            <ProposalMemberActions proposal={state.proposal} />
+          </div>
         </div>
       </div>
     </main>

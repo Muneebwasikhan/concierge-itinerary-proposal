@@ -56,6 +56,16 @@ export interface ProposalItem {
   sortOrder: number;
 }
 
+export interface ProposalDetailItem {
+  id: number;
+  category: ItineraryCategory;
+  title: string;
+  description: string;
+  scheduledAt: string;
+  priceCents: number;
+  sortOrder: number;
+}
+
 export interface Proposal {
   id: number;
   reservationId: number;
@@ -80,7 +90,7 @@ export interface ProposalDetail {
   totalCents: number;
   reservation: Reservation;
   member: Member;
-  items: ProposalItem[];
+  items: ProposalDetailItem[];
 }
 
 export interface ProposalSummary {

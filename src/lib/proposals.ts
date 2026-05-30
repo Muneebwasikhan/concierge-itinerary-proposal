@@ -3,12 +3,11 @@ import type Database from "better-sqlite3";
 import { getDb } from "./db";
 import { initializeSchema } from "./schema";
 import type {
-  CreateProposalInput,
   CreateProposalResult,
   ItineraryCategory,
   Proposal,
   ProposalDetail,
-  ProposalItem,
+  ProposalDetailItem,
   ProposalStatus,
   ProposalStatusUpdate,
   ProposalSummary,
@@ -152,10 +151,9 @@ function mapProposal(row: ProposalRow): Proposal {
   };
 }
 
-function mapProposalItem(row: ProposalItemRow): ProposalItem {
+function mapProposalDetailItem(row: ProposalItemRow): ProposalDetailItem {
   return {
     id: row.id,
-    proposalId: row.proposal_id,
     category: normalizeCategory(row.category),
     title: row.title,
     description: row.description,
@@ -239,7 +237,7 @@ function buildProposalUrl(baseUrl: string, proposalPath: string): string {
 }
 
 export function createProposal(
-  input: CreateProposalInput,
+  input: unknown,
   db: Database.Database = getDb(),
 ): CreateProposalResult {
   initializeSchema(db);
@@ -484,7 +482,7 @@ export function getProposalById(
       name: row.member_name,
       email: row.member_email,
     },
-    items: items.map(mapProposalItem),
+    items: items.map(mapProposalDetailItem),
   };
 }
 

@@ -619,3 +619,84 @@ export function sendProposal(
 
   return send();
 }
+
+export function updateDraftProposal(
+  id: number,
+  input: unknown,
+  db: Database.Database = getDb(),
+): { id: number; status: "draft" } {
+  assertPositiveInteger(id, "Proposal ID");
+  initializeSchema(db);
+
+  const validation = validateCreateProposalInput(input);
+
+  if (!validation.ok) {
+    throw new ProposalDataError(
+      "VALIDATION_ERROR",
+      validation.errors[0] ?? "Proposal input is invalid.",
+      validation.errors,
+    );
+  }
+
+  const proposalInput = validation.data;
+
+  const update = db.transaction(() => {
+    const currentStatus = getProposalStatus(db, id);
+
+    if (currentStatus !== "draft") {
+      throw new ProposalDataError(
+        "INVALID_STATUS_TRANSITION",
+        "Only draft proposals can be edited.",
+      );
+    }
+
+    const timestamp = nowIso();
+
+    db.prepare(
+      `
+      UPDATE proposals
+      SET
+        note = ?,
+        updated_at = ?
+      WHERE id = ?
+      `,
+    ).run(proposalInput.note ?? null, timestamp, id);
+
+    db.prepare("DELETE FROM proposal_items WHERE proposal_id = ?").run(id);
+
+    const insertItem = db.prepare(
+      `
+      INSERT INTO proposal_items (
+        proposal_id,
+        category,
+        title,
+        description,
+        scheduled_at,
+        price,
+        sort_order
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+      `,
+    );
+
+    proposalInput.items.forEach((item, index) => {
+      insertItem.run(
+        id,
+        item.category,
+        item.title,
+        item.description,
+        item.scheduledAt,
+        item.priceCents,
+        index,
+      );
+    });
+
+    return {
+      id,
+      status: "draft" as const,
+    };
+  });
+
+  return update();
+}
+

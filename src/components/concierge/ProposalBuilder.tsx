@@ -1,14 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import {
-  DraftItemList,
-  type DraftItineraryItem,
-} from "@/components/concierge/DraftItemList";
+import { DraftItemList, type DraftItineraryItem } from "@/components/concierge/DraftItemList";
 import { ItineraryItemForm } from "@/components/concierge/ItineraryItemForm";
 import { ProposalPreview } from "@/components/concierge/ProposalPreview";
+import { Button } from "@/components/ui/Button";
 import {
   Card,
   CardContent,
@@ -24,15 +22,22 @@ import type {
   CreateProposalInput,
   CreateProposalItemInput,
   CreateProposalResult,
+  ItineraryCategory,
   ReservationWithMember,
   SendProposalResult,
 } from "@/lib/types";
 
 type ProposalBuilderProps = {
   reservation: ReservationWithMember;
+  editingDraftId?: number | null;
+  onCancelEdit?: () => void;
 };
 
-export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
+export function ProposalBuilder({
+  reservation,
+  editingDraftId,
+  onCancelEdit,
+}: ProposalBuilderProps) {
   const router = useRouter();
   const [draftItems, setDraftItems] = useState<DraftItineraryItem[]>([]);
   const [note, setNote] = useState("");
@@ -42,6 +47,82 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
   const [savedDraftId, setSavedDraftId] = useState<number | null>(null);
   const [sentProposalId, setSentProposalId] = useState<number | null>(null);
   const totalCents = sumCents(draftItems);
+
+  useEffect(() => {
+    if (!editingDraftId) {
+      return;
+    }
+
+    let active = true;
+
+    // Defer loading state update to avoid synchronous cascading renders inside the effect body.
+    setTimeout(() => {
+      if (active) {
+        setIsSaving(true);
+        setSaveError(undefined);
+      }
+    }, 0);
+
+    fetch(`/api/proposals/${editingDraftId}`)
+      .then((res) => res.json())
+      .then((body) => {
+        if (!active) return;
+        if ("error" in body) {
+          throw new Error(body.error.message);
+        }
+
+        const proposal = body.data;
+        if (proposal.status !== "draft") {
+          throw new Error("Only draft proposals can be edited.");
+        }
+
+        const items = proposal.items.map((item: {
+          id: number;
+          category: ItineraryCategory;
+          title: string;
+          description: string;
+          scheduledAt: string;
+          priceCents: number;
+          sortOrder: number;
+        }) => ({
+          localId: crypto.randomUUID(),
+          id: item.id,
+          category: item.category,
+          title: item.title,
+          description: item.description,
+          scheduledAt: item.scheduledAt,
+          priceCents: item.priceCents,
+        }));
+
+        setDraftItems(items);
+        setNote(proposal.note || "");
+        setSavedDraftId(editingDraftId);
+        setSentProposalId(null);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setSaveError(err instanceof Error ? err.message : "Failed to load draft details.");
+      })
+      .finally(() => {
+        if (active) {
+          setIsSaving(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [editingDraftId]);
+
+  function resetBuilder() {
+    setDraftItems([]);
+    setNote("");
+    setSavedDraftId(null);
+    setSentProposalId(null);
+    setSaveError(undefined);
+    onCancelEdit?.();
+  }
+
 
   function addDraftItem(item: CreateProposalItemInput) {
     setSavedDraftId(null);
@@ -76,13 +157,21 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
     setSaveError(undefined);
 
     try {
-      const proposal = await createDraftProposal({
-        reservationId: reservation.id,
-        note: note.trim() || undefined,
-        items: draftItems.map(toCreateProposalItem),
-      });
+      if (savedDraftId) {
+        await updateDraftProposalApi(savedDraftId, {
+          reservationId: reservation.id,
+          note: note.trim() || undefined,
+          items: draftItems.map(toCreateProposalItem),
+        });
+      } else {
+        const proposal = await createDraftProposal({
+          reservationId: reservation.id,
+          note: note.trim() || undefined,
+          items: draftItems.map(toCreateProposalItem),
+        });
+        setSavedDraftId(proposal.id);
+      }
 
-      setSavedDraftId(proposal.id);
       router.refresh();
     } catch (error) {
       setSaveError(
@@ -135,10 +224,27 @@ export function ProposalBuilder({ reservation }: ProposalBuilderProps) {
   return (
     <Card as="section" padding="lg">
       <CardHeader>
-        <CardTitle>Itinerary Builder</CardTitle>
-        <CardDescription>
-          Add line items locally before saving or sending a proposal.
-        </CardDescription>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <CardTitle>Itinerary Builder</CardTitle>
+            <CardDescription>
+              {editingDraftId
+                ? `Currently editing draft proposal PR-${editingDraftId.toString().padStart(4, "0")}.`
+                : "Add line items locally before saving or sending a proposal."}
+            </CardDescription>
+          </div>
+          {editingDraftId ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                resetBuilder();
+              }}
+            >
+              Cancel / New Proposal
+            </Button>
+          ) : null}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(360px,0.8fr)]">
@@ -238,3 +344,31 @@ async function sendProposal(proposalId: number): Promise<SendProposalResult> {
 
   return body.data;
 }
+
+async function updateDraftProposalApi(
+  proposalId: number,
+  input: CreateProposalInput,
+): Promise<{ id: number; status: "draft" }> {
+  const response = await fetch(`/api/proposals/${proposalId}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(input),
+  });
+  const body = (await response.json()) as
+    | ApiSuccess<{ id: number; status: "draft" }>
+    | ApiFailure;
+
+  if (!response.ok || "error" in body) {
+    throw new Error(
+      "error" in body
+        ? body.error.message
+        : "Draft proposal could not be updated.",
+    );
+  }
+
+  return body.data;
+}
+

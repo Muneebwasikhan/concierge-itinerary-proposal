@@ -1,6 +1,8 @@
+"use client";
+
 import { AlertTriangle, Loader2 } from "lucide-react";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { ProposalBuilder } from "@/components/concierge/ProposalBuilder";
 import { ReservationSummary } from "@/components/concierge/ReservationSummary";
@@ -15,11 +17,20 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ proposals, reservation }: DashboardShellProps) {
+  const [editingDraftId, setEditingDraftId] = useState<number | null>(null);
+
   return (
     <DashboardFrame proposalCount={proposals.length}>
       <ReservationSummary reservation={reservation} />
-      <ProposalBuilder reservation={reservation} />
-      <SentProposalsTable proposals={proposals} />
+      <ProposalBuilder
+        reservation={reservation}
+        editingDraftId={editingDraftId}
+        onCancelEdit={() => setEditingDraftId(null)}
+      />
+      <SentProposalsTable
+        proposals={proposals}
+        onEditDraft={(id) => setEditingDraftId(id)}
+      />
     </DashboardFrame>
   );
 }

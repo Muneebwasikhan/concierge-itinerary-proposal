@@ -16,6 +16,7 @@ import type { ProposalStatus, ProposalSummary } from "@/lib/types";
 
 type SentProposalsTableProps = {
   proposals: ProposalSummary[];
+  onEditDraft?: (id: number) => void;
 };
 
 const statusBadgeConfig: Record<
@@ -48,7 +49,7 @@ const statusBadgeConfig: Record<
   },
 };
 
-export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
+export function SentProposalsTable({ proposals, onEditDraft }: SentProposalsTableProps) {
   return (
     <Card as="section" padding="none">
       <CardHeader className="px-5 pt-5">
@@ -114,11 +115,20 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                     />
                   </dl>
 
-                  <div className="mt-4 border-t border-border pt-4">
+                  <div className="mt-4 border-t border-border pt-4 flex items-center gap-3">
                     {proposal.status === "draft" ? (
-                      <span className="text-sm text-muted-foreground">
-                        Available after send
-                      </span>
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => onEditDraft?.(proposal.id)}
+                          className="rounded-md text-sm font-semibold text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                        >
+                          Edit Draft
+                        </button>
+                        <span className="text-sm text-muted-foreground">
+                          (Unsent)
+                        </span>
+                      </>
                     ) : (
                       <Link
                         href={`/proposal/${proposal.id}`}
@@ -199,9 +209,18 @@ export function SentProposalsTable({ proposals }: SentProposalsTableProps) {
                     </td>
                     <td className="px-5 py-4">
                       {proposal.status === "draft" ? (
-                        <span className="text-muted-foreground">
-                          Available after send
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => onEditDraft?.(proposal.id)}
+                            className="rounded-md font-semibold text-accent underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                          >
+                            Edit
+                          </button>
+                          <span className="text-xs text-muted-foreground">
+                            (Draft)
+                          </span>
+                        </div>
                       ) : (
                         <Link
                           href={`/proposal/${proposal.id}`}

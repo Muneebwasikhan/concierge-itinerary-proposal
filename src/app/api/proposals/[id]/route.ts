@@ -4,6 +4,7 @@ import {
   getProposalById,
   ProposalDataError,
   updateProposalStatus,
+  updateDraftProposal,
 } from "@/lib/proposals";
 import type {
   ApiFailure,
@@ -154,31 +155,57 @@ export async function PATCH(
     );
   }
 
-  if (!isRecord(payload) || !isProposalStatusUpdate(payload.status)) {
-    return invalidStatusResponse();
-  }
-
-  try {
-    const updatedProposal = updateProposalStatus(id, payload.status);
-
-    return NextResponse.json<ApiSuccess<UpdateProposalStatusResult>>({
-      data: updatedProposal,
-    });
-  } catch (error) {
-    if (error instanceof ProposalDataError) {
-      return proposalErrorResponse(error);
+  if (isRecord(payload) && "status" in payload) {
+    if (!isProposalStatusUpdate(payload.status)) {
+      return invalidStatusResponse();
     }
 
-    console.error("Failed to update proposal status.", error);
+    try {
+      const updatedProposal = updateProposalStatus(id, payload.status);
 
-    return NextResponse.json<ApiFailure>(
-      {
-        error: {
-          message: "Failed to update proposal status.",
-          code: "PROPOSAL_STATUS_UPDATE_FAILED",
+      return NextResponse.json<ApiSuccess<UpdateProposalStatusResult>>({
+        data: updatedProposal,
+      });
+    } catch (error) {
+      if (error instanceof ProposalDataError) {
+        return proposalErrorResponse(error);
+      }
+
+      console.error("Failed to update proposal status.", error);
+
+      return NextResponse.json<ApiFailure>(
+        {
+          error: {
+            message: "Failed to update proposal status.",
+            code: "PROPOSAL_STATUS_UPDATE_FAILED",
+          },
         },
-      },
-      { status: 500 },
-    );
+        { status: 500 },
+      );
+    }
+  } else {
+    try {
+      const updatedProposal = updateDraftProposal(id, payload);
+
+      return NextResponse.json<ApiSuccess<{ id: number; status: "draft" }>>({
+        data: updatedProposal,
+      });
+    } catch (error) {
+      if (error instanceof ProposalDataError) {
+        return proposalErrorResponse(error);
+      }
+
+      console.error("Failed to update draft proposal.", error);
+
+      return NextResponse.json<ApiFailure>(
+        {
+          error: {
+            message: "Failed to update draft proposal.",
+            code: "PROPOSAL_DRAFT_UPDATE_FAILED",
+          },
+        },
+        { status: 500 },
+      );
+    }
   }
 }

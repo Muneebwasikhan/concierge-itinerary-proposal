@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { getProposalDetailPageData } from "@/actions/proposal-detail";
 import { ProposalHero } from "@/components/proposal/ProposalHero";
+import { ProposalPriceSummary } from "@/components/proposal/ProposalPriceSummary";
+import { ProposalTimeline } from "@/components/proposal/ProposalTimeline";
 import { EmptyState } from "@/components/ui/EmptyState";
 
 export const dynamic = "force-dynamic";
@@ -42,6 +44,10 @@ export default async function ProposalPage({ params }: ProposalPageProps) {
     <main id="main-content" className="min-h-screen px-5 py-8 sm:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-6">
         <ProposalHero proposal={state.proposal} />
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+          <ProposalTimeline items={state.proposal.items} />
+          <ProposalPriceSummary proposal={state.proposal} />
+        </div>
       </div>
     </main>
   );
